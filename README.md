@@ -12,7 +12,6 @@ Python Versions
 - 311
 
 In any of the nix commands below simply concatinate the desired options above and run the setup commands
-ex
 ```
 ... #<shell>-<version>
 ```
@@ -55,7 +54,6 @@ source ./env/bin/activate
 To reset the python environment or change the installed python version
 simply remove the generate env directory and rerun the setup commands above
 
-ex
 ```bash
 rm -rf ./env
 ```
