@@ -5,8 +5,7 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs@{ self, flake-utils, nixpkgs, ... }:
-
+  outputs = flakeInputs@{ self, flake-utils, nixpkgs, ... }:
     flake-utils.lib.eachSystem [
       "x86_64-darwin"
       "aarch64-darwin"
@@ -14,44 +13,32 @@
       "aarch64-linux"
     ] (system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        pythonPackages = pkgs.python312Packages;
+        shells = [
+          # python shell types
+          { shell = "dev"; }
+          { shell = "run"; }
+        ];
 
         versions = [
           # Supported python versions
-          { version = "311"; }
-          { version = "312"; }
+          { version = "310"; }
+          {
+            version = "311";
+          }
+
+          # { version = "312"; } # pylint does not compile for darwin on 312
         ];
 
-        venvDir = "./env";
-
-        runPackages = with nixpkgs; [
-          pythonPackages.venvShellHook
-        ];
-
-        devPackages = with nixpkgs;
-          runPackages ++ [ pkgs.pylint pkgs.flake8 pkgs.black ];
-
-        # This is to expose the venv in PYTHONPATH so that pylint can see venv packages
-        postShellHook = ''
-          PYTHONPATH=\$PWD/\${venvDir}/\${pythonPackages.python.sitePackages}/:\$PYTHONPATH
-          # pip install -r requirements.txt
-        '';
-
-      in rec {
-        runShell = pkgs.mkShell {
-          inherit venvDir;
-          name = "pythonify-run";
-          packages = runPackages;
-          postShellHook = postShellHook;
+        commonInherits = {
+          inherit (nixpkgs) lib;
+          inherit flakeInputs nixpkgs;
+          inherit shells versions system;
         };
-        developmentShell = pkgs.mkShell {
-          inherit venvDir;
-          name = "pythonify-dev";
-          packages = devPackages;
-          postShellHook = postShellHook;
-        };
-        devShells.default = runShell;
-        devShells.runShell = runShell;
+
+      in {
+        devShells = import ./mkPythonShell.nix (commonInherits // { });
+
+        # Test flake inputs
+        tests = flakeInputs.nixtest.run ./.;
       });
 }
