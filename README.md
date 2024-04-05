@@ -51,9 +51,14 @@ source ./env/bin/activate
 ```
 
 ## Reset Environment
-To reset the python environment or change the installed python version
-simply remove the generate env directory and rerun the setup commands above
+To reset the python environment or change the installed python version make the required changes to `.envrc`
+and then use the builtin `p-reset` command to remove the existing environment and rerun environment setup
+```bash
+p-reset
+```
+or manually remove the generated env directory and rerun the setup commands above
 
 ```bash
 rm -rf ./env
 ```
+

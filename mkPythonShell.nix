@@ -26,11 +26,17 @@ let
         ] else
           [ ]);
 
+      python-reset = pkgs.writeShellScriptBin "p-reset" ''
+        rm -rf env && direnv allow
+      '';
+
     in pkgs.mkShell {
       inherit venvDir;
       name = "pythonify-${shell}";
       packages = shellPackages;
       postShellHook = postShellHook;
+
+      buildInputs = [ python-reset ];
     };
 
   shellVersionPermutations =
